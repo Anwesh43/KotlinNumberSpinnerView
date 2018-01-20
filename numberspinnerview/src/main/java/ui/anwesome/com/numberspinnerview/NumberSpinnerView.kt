@@ -64,22 +64,25 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
         fun update(stopcb:(Int)->Unit) {
             state.update {
                 stopcb(currNode?.number?:-1)
+                mode = 0
+                prevNode = null
             }
         }
     }
-    data class State(var scale:Float = 0f,var dir:Float = 0,var prevScale:Float = 0f) {
+    data class State(var scale:Float = 0f,var dir:Float = 0f,var prevScale:Float = 0f) {
         fun update(stopcb:()->Unit) {
             scale += 0.1f*dir
             if(Math.abs(scale - prevScale) > 1) {
-                this.scale = prevScale+dir
+                this.scale = 0f
                 this.dir = 0f
-                this.prevScale = this.scale
                 stopcb()
             }
         }
         fun startUpdating(startcb:()->Unit) {
-            dir = 1 - 2*scale
-            startcb()
+            if(dir == 0f) {
+                dir = 1 - 2 * scale
+                startcb()
+            }
         }
     }
 }
