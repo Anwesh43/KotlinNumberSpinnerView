@@ -3,6 +3,7 @@ package ui.anwesome.com.numberspinnerview
 /**
  * Created by anweshmishra on 21/01/18.
  */
+import android.app.Activity
 import android.view.*
 import android.graphics.*
 import android.content.*
@@ -142,6 +143,13 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             numberNodeList?.startUpdating(dir,{
                 animator.start()
             })
+        }
+    }
+    companion object {
+        fun create(activity:Activity):NumberSpinnerView {
+            val view = NumberSpinnerView(activity)
+            activity.setContentView(view)
+            return view
         }
     }
 }
