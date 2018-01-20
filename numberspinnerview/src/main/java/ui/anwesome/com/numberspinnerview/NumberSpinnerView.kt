@@ -26,10 +26,13 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
         var prev:NumberNode?=null
         fun drawText(canvas:Canvas,paint:Paint,scale:Float,x:Float,y:Float,w:Float,dir:Int) {
             paint.color = Color.WHITE
-            canvas.drawRoundRect(RectF(x,y-dir*w*scale,x+w,y+w-dir*w*scale),w/10,w/10,paint)
+            canvas.save()
+            canvas.translate(x+w/2,y-dir*w*scale+w/2)
+            canvas.drawRect(RectF(-w/2,-w/2,w/2,w/2),paint)
             paint.textSize = w/2
             paint.color = Color.BLACK
-            canvas.drawText("$number",x+w/2,y+paint.textSize/4,paint)
+            canvas.drawText("$number",-paint.measureText("$number")/2,paint.textSize/4,paint)
+            canvas.restore()
         }
     }
     data class NumberNodeList(var w:Float,var h:Float,var n:Int,var mode:Int = 0) {
@@ -49,8 +52,13 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             root.prev = node
         }
         fun draw(canvas:Canvas,paint:Paint) {
+            canvas.save()
+            val path = Path()
+            path.addRoundRect(w/2-w/10,h/2-w/10,w/2+w/10,h/2+w/10,w/25,w/25,Path.Direction.CW)
+            canvas.clipPath(path)
             currNode?.drawText(canvas,paint,state.scale,w/2-w/10,h/2-w/10+(w/5)*mode,w/5,mode)
             prevNode?.drawText(canvas,paint,state.scale,w/2-w/10,h/2-w/10,w/5,mode)
+            canvas.restore()
         }
         fun startUpdating(dir:Int,startcb:()->Unit) {
             if(mode == 0) {
