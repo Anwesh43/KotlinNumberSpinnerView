@@ -110,4 +110,36 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             }
         }
     }
+    data class Renderer(var view:NumberSpinnerView,var time:Int = 0) {
+        val animator = Animator(view)
+        var w:Float = 0f
+        var h:Float = 0f
+        var numberNodeList:NumberNodeList?=null
+        fun render(canvas:Canvas,paint:Paint) {
+            if(time == 0) {
+                w = canvas.width.toFloat()
+                h = canvas.height.toFloat()
+                numberNodeList = NumberNodeList(w,h,view.n)
+            }
+            numberNodeList?.draw(canvas,paint)
+            time++
+            animator.animate {
+                numberNodeList?.update {
+                    animator.stop()
+                }
+            }
+        }
+        fun handleTap(x:Float,y:Float) {
+            var dir = 1
+            if(y > h/2+h/10) {
+                dir = 1
+            }
+            else if(y < h/2-h/10) {
+                dir = -1
+            }
+            numberNodeList?.startUpdating(dir,{
+                animator.start()
+            })
+        }
+    }
 }
