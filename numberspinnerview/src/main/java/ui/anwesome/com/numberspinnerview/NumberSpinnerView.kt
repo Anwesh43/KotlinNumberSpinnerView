@@ -34,6 +34,7 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
         var root:NumberNode = NumberNode(0)
         var currNode:NumberNode? = root
         var prevNode:NumberNode?=null
+        val state = State()
         init {
             var node = root
             for(i in 1..n) {
@@ -46,8 +47,8 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             root.prev = node
         }
         fun draw(canvas:Canvas,paint:Paint) {
-            currNode?.drawText(canvas,paint,1f,w/2-w/10,h/2-w/10+(w/5)*mode,w/5,mode)
-            prevNode?.drawText(canvas,paint,1f,w/2-w/10,h/2-w/10,w/5,mode)
+            currNode?.drawText(canvas,paint,state.scale,w/2-w/10,h/2-w/10+(w/5)*mode,w/5,mode)
+            prevNode?.drawText(canvas,paint,state.scale,w/2-w/10,h/2-w/10,w/5,mode)
         }
         fun startUpdating(dir:Int,startcb:()->Unit) {
             if(mode == 0) {
@@ -57,10 +58,13 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
                     1 -> currNode = currNode?.next
                     -1 -> currNode = currNode?.prev
                 }
+                state.startUpdating(startcb)
             }
         }
-        fun update(stopcb:()->Unit) {
-
+        fun update(stopcb:(Int)->Unit) {
+            state.update {
+                stopcb(currNode?.number?:-1)
+            }
         }
     }
     data class State(var scale:Float = 0f,var dir:Float = 0,var prevScale:Float = 0f) {
@@ -72,10 +76,10 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
                 this.prevScale = this.scale
                 stopcb()
             }
-            fun startUpdating(startcb:()->Unit) {
-                dir = 1 - 2*scale
-                startcb()
-            }
+        }
+        fun startUpdating(startcb:()->Unit) {
+            dir = 1 - 2*scale
+            startcb()
         }
     }
 }
