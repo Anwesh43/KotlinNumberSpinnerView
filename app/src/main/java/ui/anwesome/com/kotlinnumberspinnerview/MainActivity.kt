@@ -2,6 +2,7 @@ package ui.anwesome.com.kotlinnumberspinnerview
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import ui.anwesome.com.numberspinnerview.NumberSpinnerView
 
@@ -13,5 +14,10 @@ class MainActivity : AppCompatActivity() {
         view.addOnNumberSelectedListener {
             Toast.makeText(this,"number selected $it",Toast.LENGTH_SHORT).show()
         }
+        fullScreen()
     }
+}
+fun AppCompatActivity.fullScreen() {
+    supportActionBar?.hide()
+    window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 }
