@@ -153,6 +153,30 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             })
         }
     }
+    data class ArrowBtn(var x:Float,var y:Float,var size:Float,var dir:Int,var scale:Float = 0f) {
+        fun draw(canvas:Canvas,paint:Paint) {
+            canvas.save()
+            canvas.translate(x,y)
+            canvas.rotate(90f*(1+dir))
+            val path = Path()
+            path.moveTo(-size/2,size/2)
+            path.lineTo(size/2,size/2)
+            path.lineTo(0f,-size/2)
+            path.lineTo(-size/2,size/2)
+            paint.color = Color.WHITE
+            canvas.drawPath(path,paint)
+            paint.color = Color.parseColor("#99FAFAFA")
+            canvas.save()
+            canvas.scale(scale,scale)
+            canvas.drawPath(path,paint)
+            canvas.restore()
+            canvas.restore()
+        }
+        fun update(scale:Float) {
+            this.scale = scale
+        }
+        fun handleTap(x:Float,y:Float):Boolean = x>=this.x-size/2 && x<=this.x+size/2 && y>=this.y-size/2 && y<=this.y+size/2
+    }
     companion object {
         fun create(activity:Activity):NumberSpinnerView {
             val view = NumberSpinnerView(activity)
