@@ -7,6 +7,8 @@ import android.app.Activity
 import android.view.*
 import android.graphics.*
 import android.content.*
+import java.util.concurrent.ConcurrentLinkedQueue
+
 class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val renderer = Renderer(this)
@@ -71,12 +73,13 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
                 state.startUpdating(startcb)
             }
         }
-        fun update(stopcb:(Int)->Unit) {
+        fun update(updatecb:(Float)->Unit,stopcb:(Int)->Unit) {
             state.update {
                 stopcb(currNode?.number?:-1)
                 mode = 0
                 prevNode = null
             }
+            updatecb(state.scale)
         }
     }
     data class State(var scale:Float = 0f,var dir:Float = 0f,var prevScale:Float = 0f) {
@@ -135,9 +138,9 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             numberNodeList?.draw(canvas,paint)
             time++
             animator.animate {
-                numberNodeList?.update {
+                numberNodeList?.update({},{
                     animator.stop()
-                }
+                })
             }
         }
         fun handleTap(x:Float,y:Float) {
@@ -153,7 +156,7 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             })
         }
     }
-    data class ArrowBtn(var x:Float,var y:Float,var size:Float,var dir:Int,var scale:Float = 0f) {
+    data class ArrowBtn(var x:Float,var y:Float,var size:Float,var dir:Int,var scale:Float = 0f,var selected:Boolean = false) {
         fun draw(canvas:Canvas,paint:Paint) {
             canvas.save()
             canvas.translate(x,y)
@@ -172,10 +175,50 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             canvas.restore()
             canvas.restore()
         }
+        fun setSelectedBtn(selected: Boolean) {
+            this.selected = selected
+        }
         fun update(scale:Float) {
             this.scale = scale
         }
         fun handleTap(x:Float,y:Float):Boolean = x>=this.x-size/2 && x<=this.x+size/2 && y>=this.y-size/2 && y<=this.y+size/2
+    }
+    data class NumberSpinner(var w:Float,var h:Float,var n:Int) {
+        var btns:ConcurrentLinkedQueue<ArrowBtn> = ConcurrentLinkedQueue()
+        var numberNodeList:NumberNodeList = NumberNodeList(w,h,n)
+        init {
+            btns.add(ArrowBtn(w/2,h/2-w/5,w/20,-1))
+            btns.add(ArrowBtn(w/2,h/2+w/5,w/20,1))
+        }
+        fun draw(canvas:Canvas,paint:Paint) {
+            btns.forEach { btn ->
+                btn.draw(canvas,paint)
+            }
+            numberNodeList.draw(canvas,paint)
+        }
+        fun update(stopcb: (Int) -> Unit) {
+            var selectedBtns = btns.filter {
+                it.selected
+            }
+            if(selectedBtns.size == 1) {
+                var selectedBtn = selectedBtns[0]
+                numberNodeList.update({
+                    selectedBtn.update(it)
+                },{
+                    selectedBtn.setSelectedBtn(false)
+                    stopcb(it)
+                })
+            }
+        }
+        fun handleTap(x:Float,y:Float,startcb: () -> Unit) {
+            btns.forEach {
+                if(it.handleTap(x,y)) {
+                    it.setSelectedBtn(true)
+                    numberNodeList.startUpdating(it.dir,startcb)
+                    return
+                }
+            }
+        }
     }
     companion object {
         fun create(activity:Activity):NumberSpinnerView {
