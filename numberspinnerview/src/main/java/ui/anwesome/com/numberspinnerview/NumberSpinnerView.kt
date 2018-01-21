@@ -161,7 +161,7 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             path.lineTo(-size/2,size/2)
             paint.color = Color.WHITE
             canvas.drawPath(path,paint)
-            paint.color = Color.parseColor("#99FAFAFA")
+            paint.color = Color.parseColor("#99212121")
             canvas.save()
             canvas.scale(scale,scale)
             canvas.drawPath(path,paint)
@@ -180,8 +180,8 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
         var btns:ConcurrentLinkedQueue<ArrowBtn> = ConcurrentLinkedQueue()
         var numberNodeList:NumberNodeList = NumberNodeList(w,h,n)
         init {
-            btns.add(ArrowBtn(w/2,h/2-w/5,w/20,-1))
-            btns.add(ArrowBtn(w/2,h/2+w/5,w/20,1))
+            btns.add(ArrowBtn(w/2,h/2-w/5,w/12,-1))
+            btns.add(ArrowBtn(w/2,h/2+w/5,w/12,1))
         }
         fun draw(canvas:Canvas,paint:Paint) {
             btns.forEach { btn ->
