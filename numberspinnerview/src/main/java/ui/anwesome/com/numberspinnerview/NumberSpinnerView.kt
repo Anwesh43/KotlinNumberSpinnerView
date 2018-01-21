@@ -12,8 +12,12 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val renderer = Renderer(this)
+    var onNumberSelectedListener:OnNumberSelectedListener?=null
     override fun onDraw(canvas:Canvas) {
         renderer.render(canvas,paint)
+    }
+    fun addOnNumberSelectedListener(onNumberListener: (Int) -> Unit) {
+        onNumberSelectedListener = OnNumberSelectedListener(onNumberListener)
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
         when(event.action) {
@@ -139,6 +143,7 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             time++
             animator.animate {
                 numberSpinner?.update({
+                    view.onNumberSelectedListener?.onNumberListener?.invoke(it)
                     animator.stop()
                 })
             }
@@ -221,4 +226,5 @@ class NumberSpinnerView(ctx:Context,var n:Int = 12):View(ctx) {
             return view
         }
     }
+    data class OnNumberSelectedListener(var onNumberListener:(Int)->Unit)
 }
